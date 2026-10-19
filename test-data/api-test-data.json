@@ -1,0 +1,30 @@
+{
+  "productSearch": {
+    "matching": "top",
+    "noMatch": "Product That Does Not Exist"
+  },
+  "missingCredentialsEmail": "api-missing-password@example.com",
+  "accountEmailPrefix": "cucumber-api",
+  "accountProfile": {
+    "name": "Cucumber API Test",
+    "title": "Mr",
+    "birth_date": "1",
+    "birth_month": "1",
+    "birth_year": "1990",
+    "firstname": "Cucumber",
+    "lastname": "API",
+    "company": "Automation Exercise Tests",
+    "address1": "1 Test Avenue",
+    "address2": "Test District",
+    "country": "India",
+    "zipcode": "12345",
+    "state": "Test State",
+    "city": "Test City",
+    "mobile_number": "1234567890"
+  },
+  "accountUpdate": {
+    "name": "Updated Cucumber API Test",
+    "firstname": "Updated",
+    "address1": "2 Updated Test Avenue"
+  }
+}

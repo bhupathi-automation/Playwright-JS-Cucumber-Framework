@@ -1,0 +1,59 @@
+{
+  "name": "playwright-js-cucumber-framework",
+  "version": "1.0.0",
+  "description": "Beginner-friendly Playwright and Cucumber.js framework for AutomationExercise",
+  "private": true,
+  "scripts": {
+    "test": "npm run test:cucumber",
+    "pretest:cucumber": "node --input-type=module -e \"import { rmSync, mkdirSync } from 'node:fs'; rmSync('allure-results', { recursive: true, force: true }); mkdirSync('allure-results', { recursive: true });\"",
+    "test:cucumber": "cucumber-js",
+    "test:no-retry": "cross-env CUCUMBER_RETRY=0 npm run test:cucumber",
+    "test:retry": "cross-env CUCUMBER_RETRY=2 npm run test:cucumber",
+    "test:retry:demo": "cross-env CUCUMBER_RETRY=2 CUCUMBER_RETRY_DEMO=true CUCUMBER_HTML_REPORT=reports/cucumber/retry-demo-report.html TRACE_MODE=retain-on-failure SCREENSHOT_MODE=retain-on-failure npm run test:cucumber",
+    "test:chromium": "cross-env BROWSER=chromium CUCUMBER_HTML_REPORT=reports/cucumber/chromium-report.html npm run test:cucumber",
+    "test:firefox": "cross-env BROWSER=firefox CUCUMBER_HTML_REPORT=reports/cucumber/firefox-report.html npm run test:cucumber",
+    "test:webkit": "cross-env BROWSER=webkit CUCUMBER_HTML_REPORT=reports/cucumber/webkit-report.html npm run test:cucumber",
+    "test:parallel": "npm run test:cucumber -- --parallel 3",
+    "test:parallel:demo": "npm run test:cucumber -- --parallel 2 --tags \"@parallel\"",
+    "test:ui": "npm run test:cucumber -- --tags \"@ui\"",
+    "test:api": "npm run test:cucumber -- --tags \"@api\"",
+    "test:integration": "npm run test:cucumber -- --tags \"@integration\"",
+    "test:headed": "npm run test:cucumber -- --world-parameters \"{\\\"headed\\\":true}\"",
+    "test:debug": "node --inspect-brk node_modules/@cucumber/cucumber/bin/cucumber-js",
+    "config:validate": "node --input-type=module -e \"import('./config/config.js').then(({default: config}) => console.log(JSON.stringify(config, null, 2)))\"",
+    "report:cucumber": "npm run test:cucumber",
+    "report:allure": "npm run test:cucumber",
+    "allure:generate": "allure generate allure-results --clean -o reports/allure-report",
+    "allure:share": "allure generate allure-results --clean --single-file --name \"Team Allure Report\" -o reports/allure-share && node scripts/package-allure-report.js",
+    "allure:open": "allure open reports/allure-report",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check"
+  },
+  "keywords": [
+    "playwright",
+    "cucumber",
+    "automation",
+    "bdd"
+  ],
+  "author": "Bhupathi M",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "@cucumber/cucumber": "^13.2.1",
+    "allure-cucumberjs": "^3.12.2",
+    "dotenv": "^18.0.1",
+    "playwright": "^1.63.0",
+    "winston": "^3.19.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "allure-commandline": "^2.46.1",
+    "cross-env": "^10.1.0",
+    "eslint": "^10.11.0",
+    "fflate": "^0.8.3",
+    "globals": "^17.12.0",
+    "prettier": "^3.9.8"
+  }
+}

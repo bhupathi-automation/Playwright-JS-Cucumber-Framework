@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+
+# Secrets and environment files
+.env
+
+# Playwright output
+reports/
+!reports/.gitkeep
+
+allure-results/
+playwright-report/
+test-results/
+coverage/
+
+/playwright/.cache/
+/playwright/.auth/
+
+
+# Logs, OS and IDE files
+artifacts/logs/
+
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+
+*.log
+npm-debug.log*
+Thumbs.db

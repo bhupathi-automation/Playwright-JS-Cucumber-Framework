@@ -1,0 +1,123 @@
+name: Playwright Cucumber QA
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: Cucumber scenarios to run
+        required: true
+        type: choice
+        default: all
+        options:
+          - all
+          - ui
+          - api
+          - integration
+      headless:
+        description: Run the browser without a visible window
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  qa:
+    name: QA automation
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      BROWSER: chromium
+      CUCUMBER_SUITE: ${{ github.event_name == 'workflow_dispatch' && inputs.suite || 'all' }}
+      HEADLESS: ${{ github.event_name == 'workflow_dispatch' && inputs.headless == false && 'false' || 'true' }}
+      LOG_LEVEL: DEBUG
+      LOG_TO_FILE: 'true'
+      TRACE_MODE: retain-on-failure
+      VIDEO_MODE: retain-on-failure
+      VALID_EMAIL: ${{ github.event_name != 'pull_request' && secrets.VALID_EMAIL || '' }}
+      VALID_USERNAME: ${{ github.event_name != 'pull_request' && secrets.VALID_USERNAME || '' }}
+      VALID_PASSWORD: ${{ github.event_name != 'pull_request' && secrets.VALID_PASSWORD || '' }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Chromium and Linux dependencies
+        run: npx playwright install --with-deps chromium
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Check formatting
+        run: npm run format:check
+
+      - name: Run Cucumber scenarios
+        run: |
+          set -euo pipefail
+
+          case "$CUCUMBER_SUITE" in
+            all) TAG_EXPRESSION='' ;;
+            ui) TAG_EXPRESSION='@ui' ;;
+            api) TAG_EXPRESSION='@api' ;;
+            integration) TAG_EXPRESSION='@integration' ;;
+            *)
+              echo "::error::Unsupported CUCUMBER_SUITE value."
+              exit 1
+              ;;
+          esac
+
+          if [[ -z "$VALID_EMAIL" || -z "$VALID_USERNAME" || -z "$VALID_PASSWORD" ]]; then
+            echo "::warning::Credential-dependent scenarios are skipped because the required GitHub Actions secrets are not all configured."
+            if [[ -n "$TAG_EXPRESSION" ]]; then
+              TAG_EXPRESSION="$TAG_EXPRESSION and not @requiresCredentials"
+            else
+              TAG_EXPRESSION='not @requiresCredentials'
+            fi
+          fi
+
+          RUNNER=()
+          if [[ "$HEADLESS" == 'false' ]]; then
+            sudo apt-get update
+            sudo apt-get install --yes xvfb
+            RUNNER=(xvfb-run -a)
+          fi
+
+          if [[ -n "$TAG_EXPRESSION" ]]; then
+            "${RUNNER[@]}" npm run test:cucumber -- --tags "$TAG_EXPRESSION"
+          else
+            "${RUNNER[@]}" npm run test:cucumber
+          fi
+
+      - name: Generate Allure HTML report
+        if: always() && hashFiles('allure-results/*') != ''
+        run: npm run allure:generate
+
+      - name: Export standalone Allure report
+        if: always() && hashFiles('allure-results/*') != ''
+        run: npm run allure:share
+
+      - name: Upload reports, evidence, and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-cucumber-qa-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            reports/
+            allure-results/
+            artifacts/logs/
+          if-no-files-found: warn
+          retention-days: 7

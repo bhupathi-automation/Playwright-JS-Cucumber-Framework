@@ -1,0 +1,11 @@
+{
+  "productName": "Blue Top",
+  "missingProductName": "Product That Does Not Exist",
+  "productDetails": {
+    "category": "Women > Tops",
+    "price": "Rs. 500",
+    "availability": "In Stock",
+    "condition": "New",
+    "brand": "Polo"
+  }
+}
