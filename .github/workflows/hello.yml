@@ -1,0 +1,12 @@
+name: Hello CI
+ 
+on: push
+ 
+jobs:
+  say-hello:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print a greeting
+        run: echo "Hello from GitHub Actions!"
+      - name: Show who triggered this
+        run: echo "Pushed by ${{ github.actor }} to ${{ github.ref_name }}"
